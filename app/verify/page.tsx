@@ -17,55 +17,36 @@ function VerifyPageContent() {
 
   const handleConfirm = () => {
     setIsRedirecting(true);
-
     const rawQuery = window.location.search.slice(1);
     const destPrefix = 'destination=';
     const destIndex = rawQuery.indexOf(destPrefix);
-
     if (destIndex === -1) {
       setError('Invalid verification link. Destination is missing.');
       setIsRedirecting(false);
       return;
     }
-
     const afterDest = rawQuery.slice(destIndex + destPrefix.length);
-
     let destEnd = afterDest.length;
     let searchStart = 0;
     while (searchStart < afterDest.length) {
       const ampIdx = afterDest.indexOf('&', searchStart);
       if (ampIdx === -1) break;
       const rest = afterDest.slice(ampIdx + 1);
-      if (!/^https?:\/\//.test(rest) && !/^\//.test(rest)) {
-        destEnd = ampIdx;
-        break;
-      }
+      if (!/^https?:\/\//.test(rest) && !/^\//.test(rest)) { destEnd = ampIdx; break; }
       searchStart = ampIdx + 1;
     }
-
     const destination = afterDest.slice(0, destEnd);
     const forwardedRaw = afterDest.slice(destEnd).replace(/^&/, '');
-
     const forwarded = new URLSearchParams();
-    if (forwardedRaw) {
-      new URLSearchParams(forwardedRaw).forEach((value, key) => {
-        forwarded.append(key, value);
-      });
-    }
-
+    if (forwardedRaw) new URLSearchParams(forwardedRaw).forEach((v, k) => forwarded.append(k, v));
     const qIdx = destination.indexOf('?');
     const destBase = qIdx === -1 ? destination : destination.slice(0, qIdx);
     const destExisting = qIdx === -1 ? '' : destination.slice(qIdx + 1);
-
     const existingParts = destExisting ? destExisting.split('&') : [];
     const forwardedParts: string[] = [];
-    forwarded.forEach((value, key) => {
-      forwardedParts.push(`${key}=${value}`);
-    });
+    forwarded.forEach((v, k) => forwardedParts.push(`${k}=${v}`));
     const allParts = [...existingParts, ...forwardedParts].filter(Boolean);
-    const finalUrl = allParts.length ? `${destBase}?${allParts.join('&')}` : destBase;
-
-    window.location.href = finalUrl;
+    window.location.href = allParts.length ? `${destBase}?${allParts.join('&')}` : destBase;
   };
 
   return (
@@ -86,7 +67,7 @@ function VerifyPageContent() {
           onChange={(e) => setPhone(e.target.value)}
           placeholder="Enter phone number"
           className="w-full rounded-xl p-4 text-lg text-gray-400 border border-gray-200 focus:outline-none transition-colors mb-4 bg-white"
-          style={{ focusBorderColor: '#7C3AED' }}
+          style={{ borderColor: '#E5E7EB' }}
         />
         {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
         <button
